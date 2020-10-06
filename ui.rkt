@@ -1,6 +1,7 @@
 #lang racket
 
-
+; —————————————————————————————————
+; seccion de imports y variables
 (require graphics/graphics)
 (open-graphics)
 
@@ -9,6 +10,10 @@
 (define cir-pos-inicial ( - ( / alto 2 ) 50 ))
 (define ventana1 (open-viewport "Damas Chinas" alto ancho))
 (define len '(0 1 2 3 4 5 6 7 8 9))
+
+
+; —————————————————————————————————
+; seccion de interfaz grafica
 
 ;retorna la posicion (i, j) en el ui para dibujar el circulo deseado
 (define (get-ui-pos i j)
@@ -40,3 +45,7 @@
     ((draw-string ventana1) (make-posn (list-ref (get-ui-pos 0 i) 0) (+ 60 (list-ref (get-ui-pos 0 i) 1))) (number->string i))
     )
 )
+
+
+; —————————————————————————————————
+; seccion de logica de juego
