@@ -103,19 +103,30 @@
 (define (mueve-ficha color i j) (
       (draw-solid-ellipse ventana1) (make-posn (list-ref (get-ui-pos i j) 0) (list-ref (get-ui-pos i j) 1) ) 50 50 color) )
 
+;; define los valores iniciales
+
+(define iniciar-matriz
+  (for ([i len] )
+    ( for ([j len])
+       (cond
+         [(or (and (= i 0) (<= j 3)) (and (= i 1) (<= j 2)) (and (= i 2) (<= j 1)) (and (= i 3) (= j 0)))
+          ;pone la ficha en el luhar del tablero
+          (set-posicion i j 1)]
+         [ (or (and (= i 9) (>= j 6)) (and (= i 8) (>= j 7)) (and (= i 7) (>= j 8)) (and (= i 6) (= j 9)))
+          ;pone la ficha en el luhar del tablero
+          (set-posicion i j 2)]
+     ))
+))
+
 ;dibuja los circulos grises del tablero inicial
 (define dibujar-circulos
   (for ([i len] )
     ( for ([j len])
        (cond
-         [(or (and (= i 0) (<= j 3)) (and (= i 1) (<= j 2)) (and (= i 2) (<= j 1)) (and (= i 3) (= j 0)))
-          (mueve-ficha "blue" i j)
-          ;pone la ficha en el lugar del tablero
-          (set-posicion i j 1)]
-         [(or (and (= i 9) (>= j 6)) (and (= i 8) (>= j 7)) (and (= i 7) (>= j 8)) (and (= i 6) (= j 9)))
-          (mueve-ficha "red" i j)
-          ;pone la ficha en el lugar del tablero
-          (set-posicion i j 2)]
+         [(= (matrix-ref tablero i j) 1)
+          (mueve-ficha "blue" i j)]
+         [ (= (matrix-ref tablero i j) 2)
+          (mueve-ficha "red" i j)]
          [else
           (mueve-ficha "DimGray" i j)
           ]
