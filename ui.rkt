@@ -57,8 +57,20 @@
 ;;we used to check the movements of the player, cause we are already validating the movements of the ia
 (define (check-movement list)
   (define posible-moves (get-moves 2 board))
-  (print posible-moves)
+  (check-movement-aux (first list) (last list) posible-moves)
   )
+
+(define (check-movement-aux origin destination posible-moves)
+  (cond
+    [(empty? posible-moves) false]
+    [else
+     (define value  (first posible-moves)) 
+       (cond
+         [(equal? (first value) origin) (member destination (rest value))]
+         [else (check-movement-aux origin destination (cdr  posible-moves))]
+         )
+       ]
+  ))
 
 
 
@@ -116,7 +128,7 @@
       (set! board (set-value board (first (first movements) ) (second (first movements)) 0))
       (set! board (set-value board (first (last movements) ) (second (last movements)) 2))
      ]
-    [else (print "movement invalid\n")(loop)]
+    [else (println "movement invalid")(loop)]
   )
 
   ;;update board
