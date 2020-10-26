@@ -17,22 +17,31 @@
 (define len '(0 1 2 3 4 5 6 7 8 9))
 
 ;game board
-(define board (build-matrix 10 10 (lambda (x y) (* x 0))))
+(define board (list (list 1 1 1 1 0 0 0 0 0 0)
+                    (list 1 1 1 0 0 0 0 0 0 0)
+                    (list 1 1 0 0 0 0 0 0 0 0)
+                    (list 1 0 0 0 0 0 0 0 0 0)
+                    (list 0 0 0 0 0 0 0 0 0 0)
+                    (list 0 0 0 0 0 0 0 0 0 0)
+                    (list 0 0 0 0 0 0 0 0 0 2)
+                    (list 0 0 0 0 0 0 0 0 2 2)
+                    (list 0 0 0 0 0 0 0 2 2 2)
+                    (list 0 0 0 0 0 0 2 2 2 2)
+               )
+  )
 
 
 ; —————————————————————————————————
 ; game logic sention
 ; —————————————————————————————————
 ;check if we have a chip on i j
-(define (check-posicion i j) (= (matrix-ref board i j) 0))
+(define (check-posicion i j) (eq? (list-ref (list-ref board i) j) 0))
 
 ;;puts a chip on the position i j 
-;;checks if we have a chip on that place
-(define (set-posicion i j ficha)
-  (cond
-    [(check-posicion i j) (set! board (matrix-set board i j ficha))]
-    [else (print "No se puede mover, ya hay una ficha ahi.")]
- ))
+(define (set-value matrix i j value)
+  (set! matrix (list-set matrix i (list-set (list-ref matrix i) j value)))
+  matrix
+ )
 
 ;;checks if the distance between two movements is valid
 (define (check-distance origin destination)
@@ -40,14 +49,14 @@
   (define y (abs (- (list-ref origin 1) (list-ref destination 1))))
   (or (= x 2) (= x 1) (= y 2) (= y 1))
 )
-
+(define (validade-entry x y)
+  ( or (or (> x 9) (< x 0)) (or (> y 9) (< y 0))))
 ;;validates if movement is correct
 ;returns true or false
 (define (check-movement origin destination)
   (cond
-    []
-    [(not (and (list? origin) (list? destination))) false ]
-    [ (or (check-posicion (list-ref origin 0) (list-ref origin 1)) (not (check-posicion (list-ref destination 0) (list-ref destination 1)))) false]
+    [ (or (validade-entry (first origin) (second origin)) (validade-entry (first destination) (second destination))) false]
+    [ (or (check-posicion (first origin) (second origin)) (not (check-posicion (first destination) (second destination)))) false]
     [else
      ;;check the jumps
      (cond
@@ -101,26 +110,14 @@
 (define (mueve-ficha color i j) (
   (draw-solid-ellipse ventana1) (make-posn (list-ref (get-ui-pos i j) 0) (list-ref (get-ui-pos i j) 1) ) 50 50 color))
 
-;; initialice function, set up all the circles in the interface and also setup the initial positions in the matrix
-(define iniciar-matriz
-  (for ([i len] )
-    ( for ([j len])
-       (cond
-         [(or (and (= i 0) (<= j 3)) (and (= i 1) (<= j 2)) (and (= i 2) (<= j 1)) (and (= i 3) (= j 0)))
-          (set-posicion i j 1)]
-         [ (or (and (= i 9) (>= j 6)) (and (= i 8) (>= j 7)) (and (= i 7) (>= j 8)) (and (= i 6) (= j 9)))
-          (set-posicion i j 2)]
-     ))
-))
-
 ;draw all the circles 
-(define dibujar-circulos
+(define (dibujar-circulos matrix)
   (for ([i len] )
     ( for ([j len])
        (cond
-         [(= (matrix-ref board i j) 1)
+         [(= (list-ref (list-ref matrix i) j) 1)
           (mueve-ficha "blue" i j)]
-         [ (= (matrix-ref board i j) 2)
+         [ (= (list-ref (list-ref matrix i) j) 2)
           (mueve-ficha "red" i j)]
          [else
           (mueve-ficha "DimGray" i j)
@@ -144,12 +141,29 @@
 (define (to-int list)
   (filter-map (lambda (x) (string->number x)) list))
 
+(dibujar-circulos board)
 (let loop ()
+  ;;Human moving
   (display "Input: ")
   (define a (string-split (read-line (current-input-port) 'any)))
-  (if (check-movements (split-every-two (to-int a)))
-      (print "movement valid")
-      (print "movement invalid")
+  (define movements (split-every-two (to-int a)))
+  (cond
+    [(check-movements (cdr movements))
+      (set! board (set-value board (first (first movements) ) (second (first movements)) 0))
+      (set! board (set-value board (first (last movements) ) (second (last movements)) 2))
+     ]
+    [else (print "movement invalid\n")(loop)]
   )
-  (set! board (make-matrix 10 10 (get-best-move board 1 4)))
+
+  ;;update board
+  (dibujar-circulos board)
+  
+  ;;IA moving
+  (set! board (get-best-move board 1 4))
+
+  ;;Update board
+  (dibujar-circulos board)
+  
   (loop))
+
+
