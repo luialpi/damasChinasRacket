@@ -3,7 +3,7 @@
 ; —————————————————————————————————
 ; section de imports y variables
 ; —————————————————————————————————
-
+(require "definitions.rkt")
 (require graphics/graphics)
 (require htdp/matrix)
 (open-graphics)
@@ -148,8 +148,8 @@
   (display "Input: ")
   (define a (string-split (read-line (current-input-port) 'any)))
   (if (check-movements (split-every-two (to-int a)))
-      ()
+      (print "movement valid")
       (print "movement invalid")
   )
-  
+  (set! board (make-matrix 10 10 (get-best-move board 1 4)))
   (loop))

@@ -1,5 +1,7 @@
 #lang racket
 
+(provide get-best-move)
+
 ;; Create the initial board
 (define board (list (list 1 1 1 1 0 0 0 0 0 0)
                     (list 1 1 1 0 0 0 0 0 0 0)
@@ -43,18 +45,34 @@
   )
 
 (define board-jump (list
-                    (list 1 1 1 1 0 0 0 0 0 0)
-                    (list 1 1 1 0 0 0 0 0 0 0)
                     (list 1 1 0 0 0 0 0 0 0 0)
+                    (list 1 1 1 0 0 0 0 0 0 0)
+                    (list 0 1 0 0 0 0 0 0 0 0)
                     (list 1 0 1 0 0 0 0 0 0 0)
                     (list 0 0 0 1 0 0 0 0 0 0)
-                    (list 0 0 0 0 0 0 0 0 0 0)
+                    (list 0 0 0 0 1 0 0 0 0 0)
                     (list 0 0 0 0 0 0 0 0 0 2)
                     (list 0 0 0 0 0 0 0 0 2 2)
                     (list 0 0 0 0 0 0 0 2 2 2)
                     (list 0 0 0 0 0 0 2 2 2 2)
                )
   )
+;(alfa-beta board-jump 1 -inf.0 +inf.0 1) 113.82192749816322
+; (alfa-beta board-jump 3 -inf.0 +inf.0 1) 112.31966818378348
+(define board-jump-2 (list
+                    (list 0 1 0 0 0 0 0 0 0 0)
+                    (list 1 1 1 0 0 0 0 0 0 0)
+                    (list 0 1 0 0 0 0 0 0 0 0)
+                    (list 1 0 1 0 0 0 0 0 0 0)
+                    (list 0 0 0 1 0 0 0 0 0 0)
+                    (list 0 0 0 0 1 0 0 0 0 0)
+                    (list 0 0 0 0 1 0 0 0 0 2)
+                    (list 0 0 0 0 0 0 0 0 2 2)
+                    (list 0 0 0 0 0 0 0 2 2 2)
+                    (list 0 0 0 0 0 0 2 2 2 2)
+               )
+  )
+
 
 (define win-1-positions '((6 9) (7 8) (7 9) (8 7) (8 8) (8 9) (9 6) (9 7) (9 8) (9 9)))
 (define win-2-positions '((0 0) (0 1) (0 2) (0 3) (1 0) (1 1) (1 2) (2 0) (2 1) (3 0)))
@@ -239,61 +257,57 @@
           ))
   )
 
-;;(get-moves-for-list 1 (get-pos-by-pl 1 board) board)
-
 ;; Get all posible valid moves for a given player
 (define (get-moves player matrix)
   (get-moves-for-list player (get-pos-by-pl player matrix) matrix)
 )
 
 ;; Alfa-Beta with minimax algoritm
-;;(h-minimax board 3 -inf.0 +inf.0 1)
-(define (h-minimax matrix deepth a b player)
-  (if (cut-off-test matrix deepth)
-     (list (eval matrix player) matrix)
-     (cond
-       [(eq? player 1)
-        (define best-move (list -inf.0 matrix))
-        (for ([child (get-matrix-moves (get-moves player matrix) matrix)])
-          #:break (<= b a)
-          (define result (h-minimax child (- deepth 1) a b 2))
-            (cond
-              [(> (first result) (first best-move))
-                (set! best-move result)
-                (print (second best-move))
-                ])
-            (set! a (max (first best-move) a))
-            )
-          best-move
-          ]
-       [else
-        (define best-move (list +inf.0 matrix))
-        (for ([child (get-matrix-moves (get-moves player matrix) matrix)])
-          #:break (<= b a)
-          (define result (h-minimax child (- deepth 1) a b 1))
-            (cond
-              [(< (first result) (first best-move))
-                (set! best-move result)
-                (print (second best-move))
-                ])
-            (set! b (min (first best-move) b))
-            )
-          best-move
-          ])
-  )
- )
-
-
-
-;; Gets the matrix with the lowest score
-(define (lowest-matrix list-matrix matrix player)
-  (if (empty? list-matrix)
-      matrix
-    (if (> (eval (first list-matrix) player) (eval matrix player))
-        (lowest-matrix (rest list-matrix) (first list-matrix) player)
-        (lowest-matrix (rest list-matrix) matrix player)
-        )
+(define (alfa-beta matrix depth a b player)
+  (cond
+    [(cut-off-test matrix depth)
+     (eval matrix player)]
+    [(eq? player 1)
+     (set! a (max-matrix (get-matrix-moves (get-moves player matrix) matrix) matrix depth a b player))
+     a
+     ]
+    [else
+     (set! b (min-matrix (get-matrix-moves (get-moves player matrix) matrix) matrix depth a b player))
+     b
+     ]
     )
+  )
+
+;; Gets the highest score for a matrix state
+(define (max-matrix list-matrix matrix depth a b player)
+  (if (<= b a)
+      a
+      (if (empty? list-matrix)
+          a
+          (let ([max-a (alfa-beta (first list-matrix) (- depth 1) a b 2)])
+            (if (> max-a a)
+                (max-matrix (rest list-matrix) matrix depth max-a b player)
+                (max-matrix (rest list-matrix) matrix depth a b player)
+                )
+          )
+        )
+      )
+  )
+
+;; Gets the lowest score for a matrix state
+(define (min-matrix list-matrix matrix depth a b player)
+  (if (<= b a)
+      b
+      (if (empty? list-matrix)
+          b
+          (let ([max-b (alfa-beta (first list-matrix) (- depth 1) a b 1)])
+            (if (< max-b b)
+                (min-matrix (rest list-matrix) matrix depth a max-b player)
+                (min-matrix (rest list-matrix) matrix depth a b player)
+                )
+          )
+         )
+      )
   )
 
 ;; Get every matrix after a move for a list of movement
@@ -309,7 +323,25 @@
   )
  )
 
-;; (get-matrix-moves (get-moves 1 board) board)
+;; Gets the best move for given player and matrix for a given depth
+(define (get-best-move matrix player depth)
+  (if (eq? player 1)
+      (get-best-move-aux (get-matrix-moves (get-moves player matrix) matrix) null -inf.0 depth player)
+       (get-best-move-aux (get-matrix-moves (get-moves player matrix) matrix) null +inf.0 depth player)
+       )
+  )
+
+(define (get-best-move-aux list-moves best-move best-score depth player)
+  (if (empty? list-moves)
+      best-move
+      (let ([score (alfa-beta (first list-moves) depth -inf.0 +inf.0 player)])
+        (if (> score best-score)
+            (get-best-move-aux (rest list-moves) (first list-moves) score depth player)
+            (get-best-move-aux (rest list-moves) best-move best-score  depth player)
+            )
+        )
+      )
+  )
 
 ;; Move a game piece from origin position to end position
 (define (move origin end matrix)
@@ -323,12 +355,11 @@
   (or (eq? deepth 0) (or (win-check 1 matrix) (win-check 2 matrix)))
  )
 
-;; Evalua todas las posiciones para ver que tan cerca se encuentran del final 
+;; Check if the score of matrix for given player
 (define (eval matrix player)
-     (sum-list (get-pos-by-pl player matrix) player)
+     (* -1 (sum-list (get-pos-by-pl player matrix) player))
   )
-;; Ejecuta la funcion de get-distance para cada posicion para luego sumar los resultados
-;; de cada posicion
+;; Executes the function get-distance for every position of a player
 (define (sum-list pos-list player)
   (if (empty? pos-list)
       0
@@ -336,9 +367,9 @@
          (sum-list (rest pos-list) player))
   )
  )
-;; Obtener la distancia entre un punto a y otro b en linea recta
-(define (get-distance x y jugador)
+;; Gets the distance between position x and y to the end player movement
+(define (get-distance x y player)
   (cond
-    [(= jugador 1) (sqrt (+ (sqr (- 8 x)) (sqr (- 8 y))))]
+    [(= player 1) (sqrt (+ (sqr (- 9 x)) (sqr (- 9 y))))]
     [else (sqrt (+ (sqr (- 0 x)) (sqr (- 0 y))))]
   ))
