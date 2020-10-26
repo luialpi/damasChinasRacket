@@ -51,49 +51,13 @@
 )
 (define (validade-entry x y)
   ( or (or (> x 9) (< x 0)) (or (> y 9) (< y 0))))
-;;validates if movement is correct
-;returns true or false
-(define (check-movement origin destination)
-  (cond
-    [ (or (validade-entry (first origin) (second origin)) (validade-entry (first destination) (second destination))) false]
-    [ (or (check-posicion (first origin) (second origin)) (not (check-posicion (first destination) (second destination)))) false]
-    [else
-     ;;check the jumps
-     (cond
-       ;;check position with destination(1) +1
-       [(and (> (list-ref origin 1) (list-ref destination 1)) (check-distance origin  destination))
-        (not (check-posicion (list-ref destination 0) (+ 1 (list-ref destination 1)))) ]
 
-       ;;check position with destination(0) +1
-       [(and (> (list-ref origin 0) (list-ref destination 0)) (check-distance origin  destination))
-        (not (check-posicion (+ 1 (list-ref destination 0)) (list-ref destination 1)))]
-
-       ;;check position with origin(1) +1
-       [(and (< (list-ref origin 1) (list-ref destination 1)) (check-distance destination origin))
-        (not (check-posicion (list-ref origin 0) (+ 1 (list-ref origin 1))))]
-
-       ;;check position with origin(1) +1
-       [(and (< (list-ref origin 0) (list-ref destination 0)) (check-distance destination  origin))
-        (not (check-posicion (+ 1 (list-ref destination 0)) (list-ref destination 1)))]
-
-       ;else, if we dont have a jump then its a single movement so we procced to check it
-       [else (and (check-posicion (list-ref destination 0) (list-ref destination 1)) (check-distance origin destination)) ]
-       )
-     ]
-    )
-  )
 
 ;;runs a list checking if each movement is valid, example of list: '( '(i j) '(i j) '(i j))
 ;;we used to check the movements of the player, cause we are already validating the movements of the ia
-(define (check-movements list)
-  (cond
-    [(or (empty? list) (<= (length list ) 1)) true]
-    [else
-     ( cond
-        [ (check-movement (first list) (second list)) (check-movements (cdr list))]
-        [else false]
-      )]
-    )
+(define (check-movement list)
+  (define posible-moves (get-moves 2 board))
+  (print posible-moves)
   )
 
 
@@ -148,7 +112,7 @@
   (define a (string-split (read-line (current-input-port) 'any)))
   (define movements (split-every-two (to-int a)))
   (cond
-    [(check-movements (cdr movements))
+    [(check-movement movements)
       (set! board (set-value board (first (first movements) ) (second (first movements)) 0))
       (set! board (set-value board (first (last movements) ) (second (last movements)) 2))
      ]
@@ -165,5 +129,3 @@
   (dibujar-circulos board)
   
   (loop))
-
-
