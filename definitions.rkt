@@ -1,20 +1,31 @@
 #lang racket
 
-(provide get-best-move)
+(provide get-best-move get-moves)
 
 ;; Create the initial board
-(define board (list (list 1 1 1 1 0 0 0 0 0 0)
-                    (list 1 1 1 0 0 0 0 0 0 0)
-                    (list 1 1 0 0 0 0 0 0 0 0)
-                    (list 1 0 0 0 0 0 0 0 0 0)
-                    (list 0 0 0 0 0 0 0 0 0 0)
-                    (list 0 0 0 0 0 0 0 0 0 0)
+(define board (list (list 0 0 2 0 0 0 0 0 0 0)
+                    (list 0 1 1 1 0 0 0 0 0 0)
+                    (list 1 1 0 1 0 0 0 0 0 0)
+                    (list 1 0 0 0 1 0 0 0 0 0)
+                    (list 0 0 0 0 0 2 0 0 0 0)
+                    (list 0 0 0 0 0 2 1 0 0 0)
                     (list 0 0 0 0 0 0 0 0 0 2)
-                    (list 0 0 0 0 0 0 0 0 2 2)
-                    (list 0 0 0 0 0 0 0 2 2 2)
-                    (list 0 0 0 0 0 0 2 2 2 2)
+                    (list 0 0 0 0 0 2 0 0 2 0)
+                    (list 0 0 0 0 0 0 1 2 2 2)
+                    (list 0 0 0 0 0 0 2 0 0 0)
                )
   )
+
+(define bad-board (list (list 0 0 2 0 0 0 0 0 0 0) 
+                        (list 0 0 0 1 0 0 0 0 0 0) 
+                        (list 1 1 1 1 0 0 0 0 0 0) 
+                        (list 1 1 0 0 1 0 0 0 0 0) 
+                        (list 0 0 0 0 0 2 0 0 0 0) 
+                        (list 0 0 0 0 0 2 1 0 0 0) 
+                        (list 0 0 0 0 0 0 0 0 0 2) 
+                        (list 0 0 0 0 0 2 0 0 2 0) 
+                        (list 0 0 0 0 0 0 1 2 2 2) 
+                        (list 0 0 0 0 0 0 2 0 0 0)))
 
 (define board-win-1 (list
                     (list 2 2 2 2 0 0 0 0 0 0)
@@ -153,8 +164,8 @@
 (define (get-moves-by-position-up-down i j matrix)
   (cond
     [(and (> (+ i 1) 9) (> (+ j 1) 9)) null]
-    [(and (> (+ j 1) 9) (eq? (get-value matrix (+ i 1) j) 0)) (list (+ i 1) j)]
-    [(and (> (+ i 1) 9) (eq? (get-value matrix i (+ j 1)) 0)) (list i (+ j 1))]
+    [(and (> (+ j 1) 9) (eq? (get-value matrix (+ i 1) j) 0)) (list (list (+ i 1) j))]
+    [(and (> (+ i 1) 9) (eq? (get-value matrix i (+ j 1)) 0)) (list (list i (+ j 1)))]
     [else
      (if (and (<= (+ j 1) 9) (<= (+ i 1) 9))
          (cond
@@ -206,8 +217,8 @@
 (define (get-moves-by-position-down-up i j matrix)
   (cond
     [(and (< (- i 1) 0) (< (- j 1) 0)) null]
-    [(and (< (- j 1) 0) (eq? (get-value matrix (- i 1) j) 0)) (list (- i 1) j)]
-    [(and (< (- i 1) 0) (eq? (get-value matrix i (- j 1)) 0)) (list i (- j 1))]
+    [(and (< (- j 1) 0) (eq? (get-value matrix (- i 1) j) 0)) (list (list (- i 1) j))]
+    [(and (< (- i 1) 0) (eq? (get-value matrix i (- j 1)) 0)) (list (list i (- j 1)))]
     [else
      (if (and (>= (- j 1) 0) (>= (- i 1) 0))
          (cond
@@ -373,3 +384,10 @@
     [(= player 1) (sqrt (+ (sqr (- 9 x)) (sqr (- 9 y))))]
     [else (sqrt (+ (sqr (- 0 x)) (sqr (- 0 y))))]
   ))
+
+;;
+
+(define (eval-depth depth)
+  (get-best-move board 1 depth)
+  )
+

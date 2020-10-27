@@ -17,16 +17,16 @@
 (define len '(0 1 2 3 4 5 6 7 8 9))
 
 ;game board
-(define board (list (list 1 1 1 1 0 0 0 0 0 0)
-                    (list 1 1 1 0 0 0 0 0 0 0)
-                    (list 1 1 0 0 0 0 0 0 0 0)
-                    (list 1 0 0 0 0 0 0 0 0 0)
-                    (list 0 0 0 0 0 0 0 0 0 0)
-                    (list 0 0 0 0 0 0 0 0 0 0)
-                    (list 0 0 0 0 0 0 0 0 0 2)
-                    (list 0 0 0 0 0 0 0 0 2 2)
-                    (list 0 0 0 0 0 0 0 2 2 2)
-                    (list 0 0 0 0 0 0 2 2 2 2)
+(define board (list (list 0 0 0 0 0 0 0 0 0 0)
+                    (list 0 1 1 1 0 0 0 0 0 0)
+                    (list 1 1 0 1 0 0 0 0 0 0)
+                    (list 1 0 0 0 1 0 0 0 0 0)
+                    (list 0 0 0 0 0 2 0 0 0 0)
+                    (list 0 0 0 0 0 2 1 0 0 0)
+                    (list 0 0 0 0 0 0 2 0 0 2)
+                    (list 0 0 0 0 0 2 0 0 2 0)
+                    (list 0 0 0 0 0 0 1 2 2 2)
+                    (list 0 0 0 0 0 0 2 0 0 0)
                )
   )
 
@@ -56,8 +56,7 @@
 ;;runs a list checking if each movement is valid, example of list: '( '(i j) '(i j) '(i j))
 ;;we used to check the movements of the player, cause we are already validating the movements of the ia
 (define (check-movement list)
-  (define posible-moves (get-moves 2 board))
-  (check-movement-aux (first list) (last list) posible-moves)
+  (get-moves 2 board)
   )
 
 (define (check-movement-aux origin destination posible-moves)
